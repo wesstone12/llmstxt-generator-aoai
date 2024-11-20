@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@mendable/firecrawl-js": "^1.8.4",
+    "@supabase/supabase-js": "^2.46.1",
     "dotenv": "^16.4.5",
     "next": "15.0.3",
+    "openai": "^4.73.0",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106"
   },
