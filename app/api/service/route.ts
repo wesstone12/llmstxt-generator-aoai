@@ -2,29 +2,50 @@ import { NextResponse } from 'next/server';
 import FirecrawlApp, { ScrapeResponse } from '@mendable/firecrawl-js';
 import 'dotenv/config'
 
-const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
 
-if (!firecrawlApiKey) {
-  throw new Error('FIRECRAWL_API_KEY is not set');
-}
 
-const app = new FirecrawlApp({ apiKey: firecrawlApiKey });
+
 
 export async function POST(request: Request) {
-  const { text } = await request.json();
+  const { urls, bringYourOwnFirecrawlApiKey } = await request.json();
+  let firecrawlApiKey: string | undefined;
+  let limit: number = 5000;
 
-  // Map a website
-  const mapResult = await app.mapUrl(text, {
-    limit: 5000,
-  });
-
-  if (!mapResult.success) {
-    throw new Error(`Failed to map: ${mapResult.error}`);
+  if (bringYourOwnFirecrawlApiKey) {
+    firecrawlApiKey = bringYourOwnFirecrawlApiKey;
+    console.log("Using provided Firecrawl API key. Limit set to 5000");
+    
+  } else {
+    firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
+    limit = 10;
+    console.log("Using default limit of 10");
   }
 
-  const urls = mapResult.success ? mapResult.links : [];
 
-  console.log(urls);
+  if (!firecrawlApiKey) {
+    throw new Error('FIRECRAWL_API_KEY is not set');
+  }
+
+  const app = new FirecrawlApp({ apiKey: firecrawlApiKey });
+
+
+  let urlsToScrape = urls;
+
+  //make sure url length is less than or equal to limit
+  if (urlsToScrape && urlsToScrape.length > limit) {
+    urlsToScrape = urlsToScrape.slice(0, limit);
+  }
+  const sampleUrl = urlsToScrape[0];
+  let urlObj;
+  if (!sampleUrl.startsWith('http://') && !sampleUrl.startsWith('https://')) {
+    urlObj = new URL(`http://${sampleUrl}`);
+  } else {
+    urlObj = new URL(sampleUrl);
+  }
+  const stemUrl = `${urlObj.hostname}`;
+
+  let llmstxt = `# ${stemUrl} llms.txt\n\n`;
+  let llmsFulltxt = `# ${stemUrl} llms-full.txt\n\n`;
 
   // Batch scrape the website
 
@@ -32,10 +53,10 @@ export async function POST(request: Request) {
 const schema = {
   type: "object",
   properties: {
-    title: { type: "string" },
-    description: { type: "string" }
+    description: { type: "string" },
+    description_header: { type: "string" }
   },
-  required: ["title", "description"]
+  required: ["description", "description_header"]
 };
 
 
@@ -45,15 +66,25 @@ const schema = {
 
   // Scrape multiple websites (synchronous):
   const batchScrapeResult = await app.batchScrapeUrls(urls, {
-    formats: ['extract'],
+    formats: ['extract', 'markdown'],
+    onlyMainContent: true,
     extract: {
-      prompt: "Extract the title and description from the page.",
+      prompt: "Generate a 8-10 word description of the entire page based on what the content one will generally find on the page. Be consise yet inclusive of ALL content on the page like this example - Description: Retrieve a list of domains for the authenticated user. Based on the description generate a header that is based on ALL of the content on the page, description, and url. Short and concise like this example - Description Header: Retrieve Domain Endpoint",
       schema: schema
     }
   });
 
-  console.log(batchScrapeResult);
+  if (!batchScrapeResult.success) {
+    throw new Error(`Failed to scrape: ${batchScrapeResult.error}`);
+  }
+  // create llms.txt
+  batchScrapeResult.data.forEach((result) => {
+    const { extract, metadata } = result as unknown as { extract?: { description: string, description_header: string }, metadata: { url: string, title: string } };
+    if (extract) {
+      llmstxt += `- [${extract.description_header}](${metadata.url}): ${extract.description}\n`;
+    }
+    llmsFulltxt += result.markdown;
+  });
 
-
-  return NextResponse.json({ message: mapResult });
+  return NextResponse.json({ llmstxt: llmstxt, llmsFulltxt: llmsFulltxt });
 }
