@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import FirecrawlApp, { ScrapeResponse } from '@mendable/firecrawl-js';
-import 'dotenv/config'
+import { config } from 'dotenv';
+config();
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
+
 
 
 

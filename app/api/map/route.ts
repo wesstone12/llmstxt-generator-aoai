@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import FirecrawlApp, { ScrapeResponse } from '@mendable/firecrawl-js';
-import 'dotenv/config'
+import { config } from 'dotenv';
+config();
 
 
 
