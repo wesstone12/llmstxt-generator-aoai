@@ -103,7 +103,7 @@ export default function Home() {
 
         <div className="flex flex-col items-center gap-4 w-full">
           <div className="flex items-center gap-2 mt-6">
-            {!apiKeySet && (
+            {!apiKeySet ? (
               <>
                 {showApiKeyInput ? (
                   <>
@@ -131,6 +131,10 @@ export default function Home() {
                   </a>
                 )}
               </>
+            ) : (
+              <div className="text-green-500 text-sm">
+                Firecrawl API key set
+              </div>
             )}
             
           </div>

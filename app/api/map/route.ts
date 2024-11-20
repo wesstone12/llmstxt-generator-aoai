@@ -9,11 +9,11 @@ import 'dotenv/config'
 export async function POST(request: Request) {
   const { url, bringYourOwnFirecrawlApiKey } = await request.json();
   let firecrawlApiKey: string | undefined;
-  let limit: number = 5000;
+  let limit: number = 1000;
 
   if (bringYourOwnFirecrawlApiKey) {
     firecrawlApiKey = bringYourOwnFirecrawlApiKey;
-    console.log("Using provided Firecrawl API key. Limit set to 5000");
+    console.log("Using provided Firecrawl API key. Limit set to 1000");
     
   } else {
     firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
