@@ -120,6 +120,12 @@ export async function POST(request: Request) {
   
   }
 
+
+  if (!no_limit) {
+    llmstxt = llmstxt + "\n\n*Note: This is a full scrape of the website, and may not be representative of the entire site. Please enter a Firecrawl API key to get the entire site at llmstxt.firecrawl.dev.*";
+    llmsFulltxt = llmsFulltxt + "\n\n*Note: This is a full scrape of the website, and may not be representative of the entire site. Please enter a Firecrawl API key to get the entire site at llmsfulltxt.firecrawl.dev.*";
+  }
+
   const { data, error } = await supabase
     .from('cache')
     .insert([
