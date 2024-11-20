@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Generate llms.txt",
-  description: "Generate llms.txt",
+  description: "Generate llms.txt for any website",
 };
 
 export default function RootLayout({

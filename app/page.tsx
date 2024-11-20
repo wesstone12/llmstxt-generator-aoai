@@ -20,14 +20,15 @@ export default function Home() {
       let index = 0;
       const messages = [
         (url: string) => `Scraping URL: ${url}`,
-        (url: string) => `Extracting Title and Description for URL: ${url}`,
+        (url: string) => `Extracting Title for URL: ${url}`,
+        (url: string) => `Extracting Description for URL: ${url}`,
         (url: string) => `Adding URL to llms.txt: ${url}`
       ];
       interval = setInterval(() => {
         const currentUrl = mapUrls[index];
         setScrapingMessage(messages[index % messages.length](currentUrl));
         index = (index + 1) % mapUrls.length;
-      }, 1000);
+      }, 750);
     } else {
       setScrapingMessage("");
     }
@@ -77,7 +78,7 @@ export default function Home() {
     <div className="flex items-center justify-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       
       <div className="flex flex-col items-center gap-4">
-      <h1 className="text-6xl font-bold font-[family-name:var(--font-geist-mono)] p-10">llms.txt Generator</h1>
+      <h1 className="text-6xl font-bold font-[family-name:var(--font-geist-mono)] mb-6">llms.txt Generator</h1>
         <div className="flex items-center gap-4">
           
           <input
@@ -101,7 +102,7 @@ export default function Home() {
         )}
 
         <div className="flex flex-col items-center gap-4 w-full">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-6">
             {!apiKeySet && (
               <>
                 {showApiKeyInput ? (
@@ -111,13 +112,13 @@ export default function Home() {
                       value={bringYourOwnFirecrawlApiKey}
                       onChange={(e) => setBringYourOwnFirecrawlApiKey(e.target.value)}
                       className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-                      placeholder="Enter your Firecrawl API key"
+                      placeholder="Enter Firecrawl API key"
                     />
                     <button
                       onClick={handleSetApiKey}
                       className="text-blue-500 text-sm"
                     >
-                      Set Firecrawl key
+                      Set Firecrawl key 🔥
                     </button>
                   </>
                 ) : (
@@ -126,7 +127,7 @@ export default function Home() {
                     onClick={() => setShowApiKeyInput(true)}
                     className="text-blue-500 text-sm"
                   >
-                    Use your Firecrawl key
+                    Use your Firecrawl key 🔥
                   </a>
                 )}
               </>
