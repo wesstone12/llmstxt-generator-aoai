@@ -3,18 +3,17 @@ import FirecrawlApp, { ScrapeResponse } from '@mendable/firecrawl-js';
 import { config } from 'dotenv';
 config();
 
-
-
-
+export const maxDuration = 300; 
 
 export async function POST(request: Request) {
   const { url, bringYourOwnFirecrawlApiKey } = await request.json();
   let firecrawlApiKey: string | undefined;
-  let limit: number = 1000;
+  let limit: number = 100;
+  console.log("url", url);
 
   if (bringYourOwnFirecrawlApiKey) {
     firecrawlApiKey = bringYourOwnFirecrawlApiKey;
-    console.log("Using provided Firecrawl API key. Limit set to 1000");
+    console.log("Using provided Firecrawl API key. Limit set to 100");
     
   } else {
     firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
@@ -31,12 +30,19 @@ export async function POST(request: Request) {
 
 
   let urlObj;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    urlObj = new URL(`http://${url}`);
-  } else {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
     urlObj = new URL(url);
+    
+  } else if (url.startsWith('http:/') || url.startsWith('https:/')) {
+    urlObj = new URL(url);
+ 
+  } else {
+    urlObj = new URL(`http://${url}`);
+  
   }
-  const stemUrl = `${urlObj.protocol}//${urlObj.hostname}`;
+  
+  const stemUrl = `${urlObj.hostname}`;
+
  
   let llmstxt = `# ${urlObj.hostname} llms.txt\n\n`;
   let llmsFulltxt = `# ${urlObj.hostname} llms-full.txt\n\n`;

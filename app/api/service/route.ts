@@ -7,7 +7,7 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
-
+export const maxDuration = 300; 
 
 
 
@@ -15,11 +15,11 @@ import { z } from "zod";
 export async function POST(request: Request) {
   const { urls, bringYourOwnFirecrawlApiKey } = await request.json();
   let firecrawlApiKey: string | undefined;
-  let limit: number = 1000;
+  let limit: number = 100;
   let no_limit: boolean = false;
   if (bringYourOwnFirecrawlApiKey) {
     firecrawlApiKey = bringYourOwnFirecrawlApiKey;
-    console.log("Using provided Firecrawl API key. Limit set to 1000");
+    console.log("Using provided Firecrawl API key. Limit set to 100");
     no_limit = true;
   } else {
     firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
@@ -45,11 +45,17 @@ export async function POST(request: Request) {
   }
   const sampleUrl = urlsToScrape[0];
   let urlObj;
-  if (!sampleUrl.startsWith('http://') && !sampleUrl.startsWith('https://')) {
-    urlObj = new URL(`http://${sampleUrl}`);
-  } else {
+  if (sampleUrl.startsWith('http://') || sampleUrl.startsWith('https://')) {
     urlObj = new URL(sampleUrl);
+    
+  } else if (sampleUrl.startsWith('http:/') || sampleUrl.startsWith('https:/')) {
+    urlObj = new URL(sampleUrl);
+ 
+  } else {
+    urlObj = new URL(`http://${sampleUrl}`);
+  
   }
+  
   const stemUrl = `${urlObj.hostname}`;
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -64,11 +70,11 @@ export async function POST(request: Request) {
     .single();
 
   if (cacheError) {
-    console.error('Error fetching cache:', cacheError);
+    console.log('no cache hit');
   } else if (cacheData) {
     const cacheAge = (new Date().getTime() - new Date(cacheData.cached_at).getTime()) / (1000 * 60 * 60 * 24);
     if (cacheAge < 3) {
-      console.log(`Cache hit for ${stemUrl}`);
+      console.log(`cache hit for ${stemUrl}`);
       return NextResponse.json({ llmstxt: cacheData.llmstxt, llmsfulltxt: cacheData.llmsfulltxt });
     }
   }
@@ -124,8 +130,8 @@ export async function POST(request: Request) {
 
 
   if (!no_limit) {
-    llmstxt = llmstxt + "\n\n*Note: This is a full scrape of the website, and may not be representative of the entire site. Please enter a Firecrawl API key to get the entire site at llmstxt.firecrawl.dev.*";
-    llmsFulltxt = llmsFulltxt + "\n\n*Note: This is a full scrape of the website, and may not be representative of the entire site. Please enter a Firecrawl API key to get the entire site at llmsfulltxt.firecrawl.dev.*";
+    llmstxt = `*Note: This is llmstxt.txt is not complete, please enter a Firecrawl API key to get the entire llmstxt.txt at llmstxt.firecrawl.dev or you can access llms.txt via API with curl -X GET 'http://llmstxt.firecrawl.dev/https://${stemUrl}?FIRECRAWL_API_KEY=YOUR_API_KEY' or llms-full.txt via API with curl -X GET 'http://llmstxt.firecrawl.dev/https://${stemUrl}/full?FIRECRAWL_API_KEY=YOUR_API_KEY'\n\n` + llmstxt
+    llmsFulltxt =  `*Note: This is llms-full.txt is not complete, please enter a Firecrawl API key to get the entire llms-full.txt at llmstxt.firecrawl.dev or you can access llms.txt via API with curl -X GET 'http://llmstxt.firecrawl.dev/https://${stemUrl}?FIRECRAWL_API_KEY=YOUR_API_KEY' or llms-full.txt via API with curl -X GET 'http://llmstxt.firecrawl.dev/https://${stemUrl}/full?FIRECRAWL_API_KEY=YOUR_API_KEY'\n\n` + llmsFulltxt
   }
 
   const { data, error } = await supabase
