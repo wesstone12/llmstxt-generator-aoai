@@ -3,11 +3,22 @@ export const maxDuration = 300;
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string[] } }
+  { params }: { params: Record<string, string | string[]> }
 ) {
   try {
+    // Handle the 'slug' parameter
+    let slugArray: string[];
+
+    if (Array.isArray(params.slug)) {
+      slugArray = params.slug;
+    } else if (typeof params.slug === 'string') {
+      slugArray = [params.slug];
+    } else {
+      slugArray = [];
+    }
+
     // Reconstruct the target URL from the slug
-    const targetUrl = decodeURIComponent(params.slug.join('/'));
+    const targetUrl = decodeURIComponent(slugArray.join('/'));
 
     // Parse the request URL
     const url = new URL(request.url);
@@ -65,7 +76,7 @@ export async function GET(
     const serviceData = await serviceResponse.json();
 
     // Check if the URL ends with /full and return only "llmsfulltxt" if true
-    if (params.slug[params.slug.length - 1] === 'full') {
+    if (slugArray[slugArray.length - 1] === 'full') {
       const llmsFulltxt = serviceData.llmsfulltxt;
       if (!llmsFulltxt) {
         console.error('llmsfulltxt is undefined in the response');
