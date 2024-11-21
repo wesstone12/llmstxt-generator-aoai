@@ -13,6 +13,7 @@ export default function Home() {
   const [apiKeySet, setApiKeySet] = useState<boolean>(false);
   const [mapUrls, setMapUrls] = useState<string[]>([]);
   const [scrapingMessage, setScrapingMessage] = useState<string>("");
+  const [apiInfoMessage, setApiInfoMessage] = useState<string>("");
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -136,8 +137,14 @@ export default function Home() {
                 Firecrawl API key set
               </div>
             )}
+
+            | <a href="#" onClick={() => setApiInfoMessage(apiInfoMessage ? "" : "You can access llms.txt via API by simply going to 'http://llmstxt.firecrawl.dev/{YOUR_URL}' or llms-full.txt via API with 'http://llmstxt.firecrawl.dev/{YOUR_URL}/full'. If you have a Firecrawl API key, you can use it by adding '?FIRECRAWL_API_KEY=YOUR_API_KEY' to the end of the URL for full results.")} className="text-blue-500 pointer-events-auto text-sm"> Use the llms.txt Generator API</a>
             
           </div>
+          {apiInfoMessage && (
+            <div className="relative w-1/2 text-sm text-black">{apiInfoMessage}</div>
+          )}
+
           
           {apiMessage && (
               <>
