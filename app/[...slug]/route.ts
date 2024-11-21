@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = {
-  params: {
-    slug: string[];
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+
 
 export const maxDuration = 300;
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  context: { params: { slug: string[] } }
 ) {
   try {
-    const targetUrl = decodeURIComponent(params.slug.join('/'));
+    const targetUrl = decodeURIComponent(context.params.slug.join('/'));
     const { searchParams } = new URL(request.url);
     const firecrawlApiKey = searchParams.get('FIRECRAWL_API_KEY') || request.headers.get('FIRECRAWL_API_KEY');
 
@@ -64,7 +59,7 @@ export async function GET(
 
     const serviceData = await serviceResponse.json();
 
-    if (params.slug[params.slug.length - 1] === 'full') {
+    if (context.params.slug[context.params.slug.length - 1] === 'full') {
       const llmsFulltxt = serviceData.llmsfulltxt;
       if (!llmsFulltxt) {
         console.error('llmsfulltxt is undefined in the response');
