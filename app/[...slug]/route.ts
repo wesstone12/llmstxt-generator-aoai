@@ -61,7 +61,7 @@ export async function GET(
     const serviceData = await serviceResponse.json();
 
     if (resolvedParams.slug[resolvedParams.slug.length - 1] === 'full') {
-      const llmsFulltxt = serviceData.llmsfulltxt;
+      const llmsFulltxt = serviceData.llmsFulltxt;
       if (!llmsFulltxt) {
         console.error('llmsfulltxt is undefined in the response');
         return NextResponse.json(
