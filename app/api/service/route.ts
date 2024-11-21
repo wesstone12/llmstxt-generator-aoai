@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const cacheAge = (new Date().getTime() - new Date(cacheData.cached_at).getTime()) / (1000 * 60 * 60 * 24);
     if (cacheAge < 3) {
       console.log(`cache hit for ${stemUrl}`);
-      return NextResponse.json({ llmstxt: cacheData.llmstxt, llmsfulltxt: cacheData.llmsfulltxt });
+      return NextResponse.json({ llmstxt: cacheData.llmstxt, llmsFulltxt: cacheData.llmsfulltxt });
     }
   }
 
