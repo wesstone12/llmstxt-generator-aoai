@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+type RouteParams = {
+  params: {
+    slug: string[];
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export const maxDuration = 300;
+
 export async function GET(
   request: NextRequest,
-  context: { params: Record<string, string | string[]> }
+  { params }: RouteParams
 ) {
   try {
-    const { params } = context;
-    const slugArray = params.slug as string[];
-
-    // Reconstruct the target URL from the slug
-    const targetUrl = decodeURIComponent(slugArray.join('/'));
-
-    // Get the optional Firecrawl token from query parameters or headers
+    const targetUrl = decodeURIComponent(params.slug.join('/'));
     const { searchParams } = new URL(request.url);
-    const firecrawlApiKey =
-      searchParams.get('FIRECRAWL_API_KEY') ||
-      request.headers.get('FIRECRAWL_API_KEY');
+    const firecrawlApiKey = searchParams.get('FIRECRAWL_API_KEY') || request.headers.get('FIRECRAWL_API_KEY');
+
+
 
     // Prepare the request body for /api/map
     const mapRequestBody = {
@@ -61,8 +64,7 @@ export async function GET(
 
     const serviceData = await serviceResponse.json();
 
-    // Check if the URL ends with /full and return only "llmsfulltxt" if true
-    if (slugArray[slugArray.length - 1] === 'full') {
+    if (params.slug[params.slug.length - 1] === 'full') {
       const llmsFulltxt = serviceData.llmsfulltxt;
       if (!llmsFulltxt) {
         console.error('llmsfulltxt is undefined in the response');
