@@ -1,30 +1,18 @@
-import { NextResponse } from 'next/server';
-export const maxDuration = 300;
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  request: Request,
-  { params }: { params: Record<string, string | string[]> }
+  request: NextRequest,
+  context: { params: Record<string, string | string[]> }
 ) {
   try {
-    // Handle the 'slug' parameter
-    let slugArray: string[];
-
-    if (Array.isArray(params.slug)) {
-      slugArray = params.slug;
-    } else if (typeof params.slug === 'string') {
-      slugArray = [params.slug];
-    } else {
-      slugArray = [];
-    }
+    const { params } = context;
+    const slugArray = params.slug as string[];
 
     // Reconstruct the target URL from the slug
     const targetUrl = decodeURIComponent(slugArray.join('/'));
 
-    // Parse the request URL
-    const url = new URL(request.url);
-
     // Get the optional Firecrawl token from query parameters or headers
-    const searchParams = url.searchParams;
+    const { searchParams } = new URL(request.url);
     const firecrawlApiKey =
       searchParams.get('FIRECRAWL_API_KEY') ||
       request.headers.get('FIRECRAWL_API_KEY');
@@ -36,9 +24,8 @@ export async function GET(
     };
 
     // Send POST request to /api/map
-    const mapResponse = await fetch(`${url.origin}/api/map`, {
+    const mapResponse = await fetch(`${request.nextUrl.origin}/api/map`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mapRequestBody),
     });
 
@@ -59,9 +46,8 @@ export async function GET(
     };
 
     // Send POST request to /api/service
-    const serviceResponse = await fetch(`${url.origin}/api/service`, {
+    const serviceResponse = await fetch(`${request.nextUrl.origin}/api/service`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(serviceRequestBody),
     });
 
@@ -86,11 +72,7 @@ export async function GET(
         );
       }
 
-      const prettyPrintedFullTxt = JSON.stringify(
-        { llmsfulltxt: llmsFulltxt },
-        null,
-        2
-      )
+      const prettyPrintedFullTxt = JSON.stringify({ llmsFulltxt }, null, 2)
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
         .replace(/^\{\s*"llmsfulltxt":\s*"/, '')
@@ -102,10 +84,10 @@ export async function GET(
     } else {
       const llmstxt = serviceData.llmstxt;
 
-      const prettyPrintedData = JSON.stringify({ llmstxt: llmstxt }, null, 2)
+      const prettyPrintedData = JSON.stringify({ llmstxt }, null, 2)
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
-        .replace(/^\{\s*"llmstxt"\s*:\s*"/, '')
+        .replace(/^\{\s*"llmstxt":\s*"/, '')
         .replace(/"\s*\}$/, '');
 
       return new Response(prettyPrintedData, {
