@@ -3,12 +3,9 @@ export const maxDuration = 300;
 
 export async function GET(
   request: NextRequest,
-  context: { params: { slug: string[] } }
+  { params }: { params: { slug: string[] } }
 ) {
   try {
-    // Await the params to ensure they are ready for use
-    const params = await context.params;
-
     // Reconstruct the target URL from the slug
     const targetUrl = decodeURIComponent(params.slug.join('/'));
 
@@ -17,9 +14,6 @@ export async function GET(
     const firecrawlApiKey =
       searchParams.get('FIRECRAWL_API_KEY') ||
       request.headers.get('FIRECRAWL_API_KEY');
-
-
-
 
     // Prepare the request body for /map/route
     const mapRequestBody = {
@@ -80,7 +74,6 @@ export async function GET(
         );
       }
  
-  
       const prettyPrintedFullTxt = JSON.stringify({ llmsfulltxt: llmsFulltxt }, null, 2)
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
@@ -89,18 +82,18 @@ export async function GET(
       return new Response(prettyPrintedFullTxt, {
         headers: { 'Content-Type': 'application/json' },
       });
-    }else{
-    const llmstxt = serviceData.llmstxt;
+    } else {
+      const llmstxt = serviceData.llmstxt;
 
-    // Pretty print the JSON data
-    const prettyPrintedData = JSON.stringify({ llmstxt: llmstxt }, null, 2)
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/^\{\s*"llmstxt"\s*:\s*"/, '') // Remove the opening part
-      .replace(/"\s*\}$/, ''); // Remove the trailing part
+      // Pretty print the JSON data
+      const prettyPrintedData = JSON.stringify({ llmstxt: llmstxt }, null, 2)
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/^\{\s*"llmstxt"\s*:\s*"/, '') // Remove the opening part
+        .replace(/"\s*\}$/, ''); // Remove the trailing part
 
-    // Return the final data as JSON
-    return new Response(prettyPrintedData, {
+      // Return the final data as JSON
+      return new Response(prettyPrintedData, {
         headers: { 'Content-Type': 'application/json' },
       });
     }
