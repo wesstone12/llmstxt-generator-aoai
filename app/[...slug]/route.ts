@@ -70,7 +70,7 @@ export async function GET(
         );
       }
 
-      const prettyPrintedFullTxt = JSON.stringify({ llmsFulltxt }, null, 2)
+      const prettyPrintedFullTxt = JSON.stringify({ llmsfulltxt: llmsFulltxt }, null, 2)
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
         .replace(/^\{\s*"llmsfulltxt":\s*"/, '')
@@ -82,7 +82,7 @@ export async function GET(
     } else {
       const llmstxt = serviceData.llmstxt;
 
-      const prettyPrintedData = JSON.stringify({ llmstxt }, null, 2)
+      const prettyPrintedData = JSON.stringify({ llmstxt: llmstxt }, null, 2)
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
         .replace(/^\{\s*"llmstxt":\s*"/, '')
