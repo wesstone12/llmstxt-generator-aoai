@@ -101,7 +101,10 @@ export async function POST(request: Request) {
   }
   for (const result of batchScrapeResult.data) {
     const metadata = result.metadata;
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = new OpenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
+    });
 
     const DescriptionSchema = z.object({
       description: z.string(),
@@ -109,7 +112,7 @@ export async function POST(request: Request) {
     });
 
     const completion = await openai.beta.chat.completions.parse({
-      model: "gpt-4o-mini",
+      model: "gemini-1.5-flash",
       messages: [
         {
           role: "user",
